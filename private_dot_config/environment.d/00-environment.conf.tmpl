@@ -1,0 +1,59 @@
+# ~/.config/environment.d/00-environment.conf -*- mode: sh -*-
+#
+# https://wiki.archlinux.org/index.php/Systemd/User#Environment_variables
+#
+
+EMAIL={{ .email }}
+
+# setup pager
+PAGER=less
+# quit less if output fits on one screen
+LESS=-RXFSM
+# pipe argument through source-highlight filter
+LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
+
+# help paperconf
+PAPERSIZE={{ .papersize }}
+
+# timezone
+TZ={{ .timezone }}
+
+# utf-8 settings
+LANG={{ .lang }}
+
+# handle character classes with tolower(3), isalpha(3) etc.
+LC_CTYPE={{ .lang }}
+
+# sorting strings with strcol(3)
+LC_COLLATE={{ .lc_collate }}
+
+# format currency
+LC_MONETARY={{ .lc_collate }}
+
+# colored GCC warnings and errors
+GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# EDITOR setting
+ALTERNATE_EDITOR=""
+EDITOR="emacsclient"
+VISUAL=$EDITOR
+SVN_EDITOR=$EDITOR
+GIT_EDITOR=$EDITOR
+
+# debian package maintainance
+DEBFULLNAME="{{ .name }}"
+DEBEMAIL="{{ .debemail }}"
+DEBUILD_DPKG_BUILDPACKAGE_OPTS="-k0xF69AFC03593F5D866B748D908BDEAA5952784983 -sa"
+DEBUILD_LINTIAN=yes
+DEBUILD_LINTIAN_OPTS="-I --pedantic --color always --no-tag-display-limit"
+
+# gnome keyring is screwed up and always overwrite SSH_AUTH_SOCK
+# https://wiki.archlinux.org/index.php/GNOME/Keyring#Disable_keyring_daemon_components
+#GSM_SKIP_SSH_AGENT_WORKAROUND DEFAULT="1"
+# ssh-agent by systemd
+#SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gnupg/S.gpg-agent.ssh"
+
+# askpass
+SSH_ASKPASS=/usr/bin/ssh-askpass
+SUDO_ASKPASS=/usr/bin/ssh-askpass
