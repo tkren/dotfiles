@@ -1,0 +1,12 @@
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+[push]
+	default = simple
+[diff "gpg"]
+	textconv = gpg --no-tty --decrypt
+	binary = true
+[alias]
+	graphlog = log --graph --oneline
+	graphlogstat = log --graph --oneline --stat
+	whatifpush = "!git cherry -v ; git push --all --dry-run ; git push --tags --dry-run"
