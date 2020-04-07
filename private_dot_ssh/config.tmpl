@@ -1,0 +1,10 @@
+Host *
+	VisualHostKey yes
+	GSSAPIAuthentication no
+	ServerAliveInterval 15
+	ServerAliveCountMax 3
+	AddKeysToAgent ask
+
+
+Include config-work.d/*
+Include config-priv.d/*
