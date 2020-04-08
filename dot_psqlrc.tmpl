@@ -1,0 +1,48 @@
+-- https://thoughtbot.com/blog/improving-the-command-line-postgres-experience
+
+\echo `date --iso-8601=sec`
+set application_name to {{ .chezmoi.username }}_psql;
+set bytea_output to hex;
+SET plpgsql.extra_warnings TO 'shadowed_variables';
+select name,setting from pg_settings where name in ('cluster_name','bytea_output','application_name','plpgsql.extra_warnings');
+
+-- transaction settings
+\set AUTOCOMMIT off
+\set ON_ERROR_ROLLBACK interactive
+
+-- Ctrl-D after 5 tries
+\set IGNOREEOF 5
+
+-- Autocomplete keywords (like SELECT) in upper-case, even if you started
+-- typing them in lower case
+\set COMP_KEYWORD_CASE upper
+
+-- Use a separate history file per-database
+\set HISTFILE ~/.psql/history- :DBNAME
+
+-- If a command is run more than once in a row, only store it once in the history
+\set HISTCONTROL ignoredups
+
+-- prompts
+\set PROMPT1 '%n@%M:%>/%/%x%# '
+\set PROMPT2 '[more] %R > '
+
+-- Verbose error reports.
+\set VERBOSITY verbose
+
+-- result settings
+\pset null '⓿⓪⓿⓪'
+\pset linestyle 'unicode'
+\pset border 2
+\x auto
+
+-- pager settings
+\setenv PAGER less
+\setenv LESS -XFSM
+\setenv PG_COLOR 'auto'
+\pset pager always
+\pset format wrapped
+\pset columns 0
+
+-- turn on timing output
+\timing
