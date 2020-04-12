@@ -1,0 +1,278 @@
+# gpg.conf
+#
+# This is an implementation of the Riseup OpenPGP Best Practices
+# https://riseup.net/en/security/message-security/openpgp/best-practices
+#
+
+# https://alexcabal.com/creating-the-perfect-gpg-keypair/
+# https://keyring.debian.org/creating-key.html
+# https://wiki.debian.org/GnuPG/AirgappedMasterKey
+# https://wiki.debian.org/GnuPG/SmartcardSubkeys
+# https://wiki.debian.org/Subkeys
+# https://wiki.archlinux.org/index.php/GnuPG
+# https://help.ubuntu.com/community/GnuPrivacyGuardHowto
+# http://fedoraproject.org/wiki/Creating_GPG_Keys
+
+#-----------------------------
+# default key
+#-----------------------------
+
+# The default key to sign with. If this option is not used, the default key is
+# the first key found in the secret keyring
+default-key {{ .gnupg.default_key }}
+
+# for storing encrypted messages in =Sent
+# Same  as  --hidden-recipient  but this one is intended for use in the options
+# file and may be used with your own user-id as a hidden "encrypt-to-self".
+# These keys are only used when there are other recipients given either by use
+# of --recipient or by the asked user id.  No trust checking is performed for
+# these user ids and even disabled  keys can be used.
+{{with .gnupg}}
+{{range .hidden_encrypt_to}}hidden-encrypt-to {{.}}
+{{end}}{{end}}
+
+#-----------------------------
+# behavior
+#-----------------------------
+
+# Assume that command line arguments are given as UTF-8 strings. The default
+# (--no-utf8-strings) is to assume that arguments are encoded in the character
+# set as specified by --display-charset. These options affect all following
+# arguments. Both options may be used multiple times.
+utf8-strings
+
+# GnuPG can automatically locate and retrieve keys as needed using this option.
+# This happens when encrypting to an email address, and there are no
+# "user@example.com" keys on the local keyring.
+#
+# local: Locate the key using the local keyrings. This mechanism allows the
+# user to select the order a local key lookup is done. Thus using
+# '--auto-key-locate local' is identical to --no-auto-key-locate.
+auto-key-locate local
+
+# Uncomment the following option to get rid of the copyright notice
+no-greeting
+
+# Disable inclusion of the version string in ASCII armored output
+no-emit-version
+
+# Disable comment string in clear text signatures and ASCII armored messages
+no-comments
+
+# Display long key IDs
+keyid-format 0xlong
+
+# List all keys (or the specified ones) along with their fingerprints
+with-fingerprint
+
+# Include the keygrip in the key listings.
+#with-keygrip
+
+# Display the calculated validity of user IDs during key listings
+list-options show-uid-validity
+verify-options show-uid-validity
+
+# Try to use the GnuPG-Agent. With this option, GnuPG first tries to connect to
+# the agent before it asks for a passphrase.
+use-agent
+
+# If you do not use the Latin-1 (ISO-8859-1) charset, you should tell
+# GnuPG which is the native character set.  Please check the man page
+# for supported character sets.  This character set is only used for
+# Meta data and not for the actual message which does not undergo any
+# translation.  Note that future version of GnuPG will change to UTF-8
+# as default character set.
+display-charset utf-8
+
+# display photo user IDs in key listings and
+# when a signature from a key with a photo is verified.
+#list-options show-photos
+#verify-options show-photos
+list-options show-policy-urls,show-uid-validity,show-unusable-uids,show-unusable-subkeys,show-sig-expire,show-notations
+verify-options show-photos,show-uid-validity,show-policy-urls,show-unusable-uids,show-notations
+
+
+
+#-----------------------------
+# keyserver
+#-----------------------------
+
+# This is the server that --recv-keys, --send-keys, and --search-keys will
+# communicate with to receive keys from, send keys to, and search for keys on
+keyserver https://keyserver.ubuntu.com/
+keyserver hkps://hkps.pool.sks-keyservers.net
+keyserver hkps://keys.openpgp.org
+
+# do not automatically fetch keys as needed from the keyserver when verifying
+# signatures or when importing keys that have been revoked by a revocation key
+# that is not present on the keyring.
+keyserver-options no-auto-key-retrieve
+
+# Provide a certificate store to override the system default
+# Get this from https://sks-keyservers.net/sks-keyservers.netCA.pem
+#keyserver-options ca-cert-file=/usr/local/etc/ssl/certs/hkps.pool.sks-keyservers.net.pem
+
+# Set the proxy to use for HTTP and HKP keyservers - default to the standard
+# local Tor socks proxy
+# It is encouraged to use Tor for improved anonymity. Preferrably use either a
+# dedicated SOCKSPort for GnuPG and/or enable IsolateDestPort and
+# IsolateDestAddr
+#keyserver-options http-proxy=socks5-hostname://127.0.0.1:9050
+
+# Don't leak DNS, see https://trac.torproject.org/projects/tor/ticket/2846
+#keyserver-options no-try-dns-srv
+
+# When using --refresh-keys, if the key in question has a preferred keyserver
+# URL, then disable use of that preferred keyserver to refresh the key from
+keyserver-options no-honor-keyserver-url
+
+# When searching for a key with --search-keys, include keys that are marked on
+# the keyserver as revoked
+keyserver-options include-revoked
+
+
+#-----------------------------
+# algorithm and ciphers
+#-----------------------------
+
+# see http://keyring.debian.org/creating-key.html https://wiki.debian.org/DebianMaintainer
+
+# list of personal cipher preferences. When multiple ciphers are supported by
+# all recipients, choose the strongest one
+personal-cipher-preferences AES256 AES192 AES CAST5
+
+# list of personal digest preferences. When multiple ciphers are supported by
+# all recipients, choose the strongest one
+personal-digest-preferences SHA512
+
+# message digest algorithm used when signing a key
+cert-digest-algo SHA512
+
+# This preference list is used for new keys and becomes the default for
+# "setpref" in the edit menu
+default-preference-list SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 ZLIB BZIP2 ZIP Uncompressed
+
+######################################################################
+
+# If you do not pass a recipient to gpg, it will ask for one.  Using
+# this option you can encrypt to a default key.  Key validation will
+# not be done in this case.  The second form uses the default key as
+# default recipient.
+
+#default-recipient some-user-id
+#default-recipient-self
+
+# By default GnuPG creates version 3 signatures for data files.  This
+# is not strictly OpenPGP compliant but PGP 6 and most versions of PGP
+# 7 require them.  To disable this behavior, you may use this option
+# or --openpgp.
+
+#no-force-v3-sigs
+
+# Because some mailers change lines starting with "From " to ">From "
+# it is good to handle such lines in a special way when creating
+# cleartext signatures; all other PGP versions do it this way too.
+# To enable full OpenPGP compliance you may want to use this option.
+
+#no-escape-from-lines
+
+# Group names may be defined like this:
+#   group mynames paige 0x12345678 joe patti
+#
+# Any time "mynames" is a recipient (-r or --recipient), it will be
+# expanded to the names "paige", "joe", and "patti", and the key ID
+# "0x12345678".  Note there is only one level of expansion - you
+# cannot make an group that points to another group.  Note also that
+# if there are spaces in the recipient name, this will appear as two
+# recipients.  In these cases it is better to use the key ID.
+
+#group mynames paige 0x12345678 joe patti
+
+# Lock the file only once for the lifetime of a process.  If you do
+# not define this, the lock will be obtained and released every time
+# it is needed - normally this is not needed.
+
+#lock-once
+
+# GnuPG can send and receive keys to and from a keyserver.  These
+# servers can be HKP, email, or LDAP (if GnuPG is built with LDAP
+# support).
+#
+# Example HKP keyserver:
+#      x-hkp://pgp.mit.edu
+#
+# Example email keyserver:
+#      mailto:pgp-public-keys@keys.nl.pgp.net
+#
+# Example LDAP keyservers:
+#      ldap://pgp.surfnet.nl:11370
+#      ldap://keyserver.pgp.com
+#
+# Regular URL syntax applies, and you can set an alternate port
+# through the usual method:
+#      x-hkp://keyserver.example.net:22742
+#
+# If you have problems connecting to a HKP server through a buggy http
+# proxy, you can use keyserver option broken-http-proxy (see below),
+# but first you should make sure that you have read the man page
+# regarding proxies (keyserver option honor-http-proxy)
+#
+# Most users just set the name and type of their preferred keyserver.
+# Most servers do synchronize with each other and DNS round-robin may
+# give you a quasi-random server each time.
+
+#keyserver x-hkp://pgp.mit.edu
+#keyserver mailto:pgp-public-keys@keys.nl.pgp.net
+#keyserver ldap://pgp.surfnet.nl:11370
+#keyserver ldap://keyserver.pgp.com
+
+# Use this program to display photo user IDs
+#
+# %i is expanded to a temporary file that contains the photo.
+# %I is the same as %i, but the file isn't deleted afterwards by GnuPG.
+# %k is expanded to the key ID of the key.
+# %K is expanded to the long OpenPGP key ID of the key.
+# %t is expanded to the extension of the image (e.g. "jpg").
+# %T is expanded to the MIME type of the image (e.g. "image/jpeg").
+# %f is expanded to the fingerprint of the key.
+# %% is %, of course.
+#
+# If %i or %I are not present, then the photo is supplied to the
+# viewer on standard input.  If your platform supports it, standard
+# input is the best way to do this as it avoids the time and effort in
+# generating and then cleaning up a secure temp file.
+#
+# The default program is "xloadimage -fork -quiet -title 'KeyID 0x%k' stdin"
+# On Mac OS X and Windows, the default is to use your regular image viewer.
+#
+# Some other viewers:
+# photo-viewer "qiv %i"
+# photo-viewer "ee %i"
+# photo-viewer "display -title 'KeyID 0x%k'"
+#
+# This one saves a copy of the photo ID in your home directory:
+# photo-viewer "cat > ~/photoid-for-key-%k.%t"
+#
+# Use your MIME handler to view photos:
+# photo-viewer "metamail -q -d -b -c %T -s 'KeyID 0x%k' -f GnuPG"
+
+
+# Passphrase agent
+#
+# We support the old experimental passphrase agent protocol as well
+# as the new Assuan based one (currently available in the "newpg" package
+# at ftp.gnupg.org/gcrypt/alpha/aegypten/).  To make use of the agent, you have
+# to run an agent as daemon and use the option
+#
+# use-agent
+#
+# which tries to use the agent but will fallback to the regular mode
+# if there is a problem connecting to the agent.  The normal way to
+# locate the agent is by looking at the environment variable
+# GPG_AGENT_INFO which should have been set during gpg-agent startup.
+# In certain situations the use of this variable is not possible, thus
+# the option
+#
+# --gpg-agent-info=<path>:<pid>:1
+#
+# may be used to override it.
