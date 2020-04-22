@@ -21,14 +21,20 @@ TZ={{ .timezone }}
 # utf-8 settings
 LANG={{ .lang }}
 
+# unset LC_ALL
+LC_ALL=''
+
+# time format, start of week, ...
+LC_TIME={{ .lc_time }}
+
 # handle character classes with tolower(3), isalpha(3) etc.
-LC_CTYPE={{ .lang }}
+LC_CTYPE={{ .lc_ctype }}
 
 # sorting strings with strcol(3)
 LC_COLLATE={{ .lc_collate }}
 
 # format currency
-LC_MONETARY={{ .lc_collate }}
+LC_MONETARY={{ .lc_monetary }}
 
 # colored GCC warnings and errors
 GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
