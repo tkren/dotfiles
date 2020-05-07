@@ -16,7 +16,7 @@ configuration files for the following tools:
 Clone this repo into `~/.local/share/chezmoi`:
 
 ```
-git clone https://github.com/tkren/dotfiles.git ~/.local/share/chezmoi
+chezmoi init https://github.com/tkren/dotfiles.git
 ```
 
 ## chezmoi data configuration
