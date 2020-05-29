@@ -12,7 +12,7 @@ max-cache-ttl 18000
 # emacs and loopback pinentry
 allow-emacs-pinentry
 allow-loopback-pinentry
-pinentry-program /usr/bin/pinentry
+pinentry-program {{ .gnupg.pinentry_program }}
 
 # debugging options if required
 #debug-pinentry

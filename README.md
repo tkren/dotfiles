@@ -48,6 +48,7 @@ timezone = "TIMEZONE NAME"
 [data.gnupg]
 default_key = "DEFAULT KEYID"
 hidden_encrypt_to = ["KEYID1", "KEYID2", ...]
+pinentry_program = "/path/to/bin/pinentry"
 ```
 
 Check the settings with
