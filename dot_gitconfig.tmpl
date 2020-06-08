@@ -10,3 +10,5 @@
 	graphlog = log --graph --oneline
 	graphlogstat = log --graph --oneline --stat
 	whatifpush = "!git cherry -v ; git push --all --dry-run ; git push --tags --dry-run"
+[core]
+	excludesFile = {{ .chezmoi.homedir }}/.gitignore
