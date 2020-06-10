@@ -2,17 +2,24 @@
 
 autoload -Uz promptinit
 promptinit
-prompt adam1
-
-setopt histignorealldups sharehistory
+#prompt adam1
 
 # Use emacs keybindings even if our EDITOR is set to vi
 bindkey -e
 
-# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
-HISTSIZE=1000
-SAVEHIST=1000
-HISTFILE=~/.zsh_history
+# History file configuration from ohmyzsh
+# Keep 50000 lines of history within the shell and save it to ~/.zsh_history
+[ -z "$HISTFILE" ] && HISTFILE="$HOME/.zsh_history"
+[ "$HISTSIZE" -lt 50000 ] && HISTSIZE=50000
+[ "$SAVEHIST" -lt 10000 ] && SAVEHIST=10000
+
+# History command configuration
+setopt extended_history       # record timestamp of command in HISTFILE
+setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups       # ignore duplicated commands history list
+setopt hist_ignore_space      # ignore commands that start with space
+setopt hist_verify            # show command with history expansion to user before running it
+setopt share_history          # share command history data
 
 # Use modern completion system
 autoload -Uz compinit
@@ -55,14 +62,30 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
 if [ -x /usr/games/cowsay -a -x /usr/games/fortune ]; then
-	fortune -a | cowsay -n -f $(ls -1 /usr/share/cowsay/cows/ | shuf -n1)
+    fortune -a | cowsay -n -f $(ls -1 /usr/share/cowsay/cows/ | shuf -n1)
 fi
 
-autoload -U colors && colors
-#RPROMPT="%{$fg[red]%}-%{$reset_color%}%{$fg_bold[red]%}%?%{$reset_color%}%{$fg[red]%}-%{$reset_color%}"
+# enable zsh-syntax-highlighting
+for base in /usr /usr/local ; do
+    if [ -f $base/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+        source $base/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+        break
+    fi
+done
+unset base
 
-setopt PROMPT_SUBST
-RPS1='%(?..%{$fg_bold[red]%}[%? $(kill -l $?)]%{${reset_color}%} )%T' # time
+autoload -U colors && colors
+
+# https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples
+# https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+setopt prompt_subst
+PROMPT='%(?.%F{green}√.%F{red}?%?)%f %B%F{240}%1~%f%b %# '
+RPROMPT=\$vcs_info_msg_0_
+zstyle ':vcs_info:git:*' formats '%F{240}(%b)%r%f'
+zstyle ':vcs_info:*' enable git
 
 # Local Variables:
 # mode: sh
