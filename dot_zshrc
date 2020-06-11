@@ -65,14 +65,17 @@ if [ -x /usr/games/cowsay -a -x /usr/games/fortune ]; then
     fortune -a | cowsay -n -f $(ls -1 /usr/share/cowsay/cows/ | shuf -n1)
 fi
 
-# enable zsh-syntax-highlighting
-for base in /usr /usr/local ; do
-    if [ -f $base/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-        source $base/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-        break
-    fi
+# enable zsh-syntax-highlighting and zsh-autosuggestions
+for extension in source zsh-autosuggestions zsh-syntax-highlighting ; do
+    for base in /usr /usr/local ; do
+        if [ -f $base/share/$extension/$extension.zsh ]; then
+            source $base/share/$extension/$extension.zsh
+            break
+        fi
+    done
 done
 unset base
+unset extension
 
 autoload -U colors && colors
 
