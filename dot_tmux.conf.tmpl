@@ -39,7 +39,13 @@ set -g base-index 1
 
 # Set the title bar
 set -g set-titles on
-set -g set-titles-string '#(whoami)@#h (#(hostname -I | cut -d" " -f1))'
+{{- if eq .chezmoi.os "linux" }}
+set -g set-titles-string '#(whoami)@#h (#(hostname -I | cut -d" " -f1)/#(curl https://icanhazip.com))'
+{{- else if eq .chezmoi.os "darwin" }}
+set -g set-titles-string '#(whoami)@#h (#(ipconfig getifaddr en0)/#(curl https://icanhazip.com))'
+{{- else }}
+set -g set-titles-string '#(whoami)@#h (#(curl https://icanhazip.com))'
+{{- end }}
 
 # Set status bar
 set -g status-bg black
@@ -47,6 +53,12 @@ set -g status-fg white
 set -g status-interval 5
 set -g status-left-length 90
 set -g status-right-length 60
-set -g status-left "#[fg=Green]#(whoami)#[fg=white]@#[fg=blue]#(hostname -s) #[fg=white](#[fg=yellow]#(hostname -I | cut -d' ' -f1)#[fg=white])"
+{{- if eq .chezmoi.os "linux" }}
+set -g status-left "#[fg=Green]#(whoami)#[fg=white]@#[fg=blue]#h #[fg=white](#[fg=yellow]#(hostname -I | cut -d' ' -f1)/#(curl https://icanhazip.com)#[fg=white])"
+{{- else if eq .chezmoi.os "darwin" }}
+set -g status-left "#[fg=Green]#(whoami)#[fg=white]@#[fg=blue]#h #[fg=white](#[fg=yellow]#(ipconfig getifaddr en0)/#(curl https://icanhazip.com)#[fg=white])"
+{{- else }}
+set -g status-left "#[fg=Green]#(whoami)#[fg=white]@#[fg=blue]#h #[fg=white](#[fg=yellow]#(curl https://icanhazip.com)#[fg=white])"
+{{- end }}
 set -g status-justify left
 set -g status-right '#[fg=Cyan]#S #[fg=white]%a %b %d %R'
