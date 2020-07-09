@@ -1,0 +1,1249 @@
+;;
+;; ~/.emacs
+;;
+
+;;
+;; setup PATH environment
+;;
+;; Beat the damn PATH into shape
+(setq exec-path (append exec-path (list "/usr/local/bin")))
+(setenv "PATH"
+	(concat
+	 "/usr/local/bin" ":"
+	 (getenv "PATH")
+	 )
+	)
+
+; fix SSH_AUTH_SOCK for gpg
+(setenv "SSH_AUTH_SOCK"
+		(shell-command-to-string "gpgconf --list-dirs agent-ssh-socket")
+		)
+
+;; my default email address (used in other packages)
+(setq user-full-name "{{ .name }}"
+	  user-mail-address "{{ .email }}"
+	  )
+
+;; https://stackoverflow.com/questions/14031724/how-to-make-emacs-accept-utf-8-uppercase-encoding#14033335
+(define-coding-system-alias 'UTF-8 'utf-8)
+
+;; setup ~/.emacs.d/site-lisp/ as additional local elisp source for loading libs
+(setq load-path (cons (expand-file-name "~/.emacs.d/site-lisp/") load-path))
+
+;; fix backspace on macosx terminal
+(global-set-key [(control h)] 'delete-backward-char)
+
+;; Ctrl+C in X11 allows to yank in emacs
+(setq select-enable-clipboard t)
+(setq x-select-enable-clipboard-manager t)
+
+;; mouse selection in X11 allows to yank in emacs
+(setq select-enable-primary t)
+
+;;
+;; setup additional packages
+;;
+(require 'package)
+(package-initialize)
+(add-to-list 'package-archives '("stable-melpa" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
+
+;; force bookmark location
+(require 'bookmark)
+(setq bookmark-default-file (concat user-emacs-directory "bookmarks"))
+
+
+;; recentf-open-files
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 50)
+
+
+;; save minibuffer history
+(require 'savehist)
+(savehist-mode 1)
+(setq savehist-additional-variables
+	  '(kill-ring search-ring regexp-search-ring compile-command)
+	  )
+
+
+;;
+;; magit
+;;
+(require 'magit)
+(setq magit-repo-dirs-depth 1
+	  magit-diff-refine-hunk 'all
+	  )
+(global-set-key (kbd "C-x g") 'magit-status)
+(setq magit-last-seen-setup-instructions "1.4.0")
+
+
+;;
+;; smerge
+;;
+(setq smerge-command-prefix "C-x C-^")
+
+
+;;
+;; EPG/EPA, pinentry
+;;
+(require 'pinentry)
+(setq epa-pinentry-mode 'loopback)
+(require 'epg)
+(setq epg-user-id "{{ .emacs.epg_user_id }}")
+(setenv "INSIDE_EMACS" (format "%s,comint" emacs-version))
+(pinentry-start)
+
+
+;;
+;; handling linefeeds 
+;;
+(require 'page-break-lines)
+(global-page-break-lines-mode)
+
+
+;;
+;; TRAMP
+;;
+(require 'tramp)
+
+;; see also
+;; http://www.howardism.org/Technical/Emacs/tao-of-emacs.html#sec-3 for
+;; bastion host setup
+
+(setq tramp-default-method "ssh")
+
+;; https://www.gnu.org/software/tramp/#index-tramp_002dssh_002dcontrolmaster_002doptions
+(customize-set-variable 'tramp-use-ssh-controlmaster-options nil)
+
+; see https://www.emacswiki.org/emacs/TrampMode#toc12
+; default is                     "[^]#$%>\n]*#?[]#$%>] *\\(\e\\[[0-9;]*[a-zA-Z] *\\)*"
+(setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")
+
+;; https://www.gnu.org/software/emacs/manual/html_node/tramp/Multi_002dhops.html
+;; use C-c C-f /sudo:hostname:/path to access /path as root on ssh:hostname
+;; i.e., connect via ssh to hostname first, and apply sudo -u root afterwards
+(add-to-list 'tramp-default-proxies-alist
+		 '("localhost\\'" "\\`root\\'" "/ssh:%h:")
+		 )
+
+
+;;
+;; EDIFF
+;;
+(setq ediff-split-window-function
+	  (if (> (frame-width) 150)
+		  'split-window-horizontally
+		'split-window-vertically
+		)
+	  )
+;; no need for creating extra windows
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
+
+;;
+;; ps printing
+;;
+
+;; 2 column landscape size 7 prints column 0-78, lines 1 to 70
+(require 'ps-print)
+(setq ps-printer-name t
+	  printer-name "{{ .emacs.printer_name }}")
+
+;; paper size localization
+(setq ps-paper-type '{{ .papersize }})
+
+(setq ps-print-color-p 'black-white ; set to t for color printers
+	  ps-font-size 11.0
+	  ps-print-header t
+	  ps-header-lines 2
+	  ps-header-offset 5
+	  ps-print-footer nil
+	  ps-footer-lines 1
+	  ps-print-only-one-header t
+	  ps-switch-header nil
+	  ps-spool-duplex t
+	  ps-landscape-mode t
+	  ps-number-of-columns 1
+	  ps-top-margin 30
+	  ps-left-margin 20
+	  ps-inter-column 10
+	  ps-right-margin 20
+	  ps-bottom-margin 20)
+
+;; utf-8 printing
+;(setq ps-multibyte-buffer :non-latin-printer)
+(setq ps-multibyte-buffer :bdf-font-except-latin)
+(setq bdf-directory-list "/usr/share/emacs/fonts/bdf")
+
+(require 'printing)
+(pr-update-menus)
+
+
+;;
+;; setup editing mails with mutt
+;;
+(require 'footnote)
+
+;;; Email interface with mutt
+(add-to-list 'auto-mode-alist '(".*mutt.*" . message-mode))
+(setq server-temp-file-regexp "mutt-")
+
+;; standard mail mode
+(setq mail-user-agent 'message-user-agent
+	  mail-header-separator ""
+)
+
+(add-hook 'server-switch-hook
+		  (function (lambda()
+					  (cond ((string-match "Message" mode-name)
+							 (message-goto-body)
+							 )
+							)
+					  )
+					)
+		  )
+
+;; add Bcc header to the message buffer
+(setq message-default-mail-headers "Bcc: {{ .mutt.bcc }}\n")
+;; send using sendmail binary
+(setq message-send-mail-function 'message-send-mail-with-sendmail)
+;; you might want to set the following too
+(setq mail-host-address "{{ .mutt.domain }}")
+
+;; postponed messages is put in the following draft folder
+(setq message-auto-save-directory "~/Mail/drafts")
+
+(add-hook 'message-mode-hook
+		  (lambda()
+			(define-key message-mode-map [(control c) (control c)] ; leave emacsclient with C-c C-c
+			  (lambda ()
+				(interactive)
+				(save-buffer)
+				(server-edit)
+				)
+			  )
+			(auto-save-mode t)
+			(auto-fill-mode t)
+			(setq fill-column 72)    ; rfc 1855 for usenet messages
+			(flyspell-mode 1)
+			)
+		  )
+
+
+;; run clean-buffer-list for killing old buffers after 3 days
+(require 'midnight)
+(midnight-delay-set 'midnight-delay "12:00am") ;; midnight is 00:00
+(setq midnight-period 7200) ;; run midnight every 5h
+
+
+;; Browse this kill-ring
+(require 'browse-kill-ring)
+(global-set-key (kbd "C-c k") 'browse-kill-ring)
+
+
+;;
+;; bbdb big brother db
+;; https://emacs-fu.blogspot.com/2009/08/managing-e-mail-addresses-with-bbdb.html
+;;
+(setq bbdb-file "~/.emacs.d/bbdb")           ;; keep ~/ clean; set before loading
+(require 'bbdb)
+(bbdb-initialize)
+(setq
+ bbdb-north-american-phone-numbers-p nil  ;; no strict american phone numbers
+ bbdb-offer-save 1                        ;; 1 means save-without-asking
+ bbdb-use-pop-up t                        ;; allow popups for addresses
+ bbdb-electric-p t                        ;; be disposable with SPC
+ bbdb-popup-target-lines  1               ;; very small
+ bbdb-dwim-net-address-allow-redundancy t ;; always use full name
+ bbdb-quiet-about-name-mismatches 2       ;; show name-mismatches 2 secs
+ bbdb-always-add-address t                ;; add new addresses to existing contacts automatically
+ bbdb-canonicalize-redundant-nets-p t     ;; x@foo.bar.cx => x@bar.cx
+ bbdb-completion-type nil                 ;; complete on anything
+ bbdb-complete-name-allow-cycling t       ;; cycle through matches (this only works partially)
+ bbbd-message-caching-enabled t           ;; be fast
+ bbdb-use-alternate-names t               ;; use AKA
+ bbdb-elided-display t                    ;; single-line addresses
+ ;; auto-create addresses from mail
+ bbdb/mail-auto-create-p 'bbdb-ignore-some-messages-hook
+ bbdb-ignore-some-messages-alist ;; don't ask about fake addresses
+ ;; NOTE: there can be only one entry per header (such as To, From)
+ ;; http://flex.ee.uec.ac.jp/texi/bbdb/bbdb_11.html
+ '(( "From" . "no.?reply\\|DAEMON\\|daemon\\|facebookmail\\|twitter"))
+ )
+(add-hook 'message-setup-hook 'bbdb-mail-aliases)
+
+
+;;
+;; lbdb
+;;
+(autoload 'lbdb "lbdb" "Query the Little Brother's Database" t)
+(autoload 'lbdb-region "lbdb" "Query the Little Brother's Database" t)
+(autoload 'lbdb-maybe-region "lbdb" "Query the Little Brother's Database" t)
+
+
+;;
+;; dired
+;;
+(when (eq system-type 'darwin)
+  (setq dired-use-ls-dired nil))
+(setq dired-listing-switches "-lthA") ;; sort by date, human-readable
+;; reuse buffers
+(put 'dired-find-alternate-file 'disabled nil)
+;(toggle-dired-find-file-reuse-dir 1)
+(setq wdired-allow-to-change-permissions t
+	  wdired-confirm-overwrite t
+	  )
+
+
+;;
+;; proced
+;; https://www.masteringemacs.org/article/displaying-interacting-processes-proced
+;; Start proced in a similar manner to dired
+(require 'proced)
+(global-set-key (kbd "C-x p") 'proced)
+
+
+;;
+;; rainbow delimiters
+;;
+(require 'rainbow-delimiters)
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+
+
+;;
+;; sql mode
+;;
+(require 'sql)
+(sql-set-product "postgres")
+
+
+;;
+;; ledger mode
+;;
+(require 'ledger-mode)
+(setq ledger-reconcile-default-commodity "{{ .currency }}")
+
+
+;;
+;; markdown mode
+;;
+(require 'markdown-mode)
+
+
+;;
+;; autoinsert mode
+;;
+
+;; automatic insertion of templates
+(require 'autoinsert)
+(auto-insert-mode)  ;;; Adds hook to find-files-hook
+(add-hook 'find-file-hooks 'auto-insert)
+(setq auto-insert-directory "~/.emacs.d/autoinsert/")
+(define-auto-insert "\.py" "autoinsert.py")
+(define-auto-insert "\.ex" "autoinsert.ex")
+
+;;
+;; desktop mode
+;;
+
+; bugfix: don't store frame/window configuration in case we run emacs
+; both in x11 and terminal
+(setq desktop-restore-frames nil)
+(desktop-save-mode 1)
+;; use only one desktop
+(setq desktop-path '("~/.emacs.d/"))
+(setq desktop-dirname "~/.emacs.d/")
+(setq desktop-base-file-name "emacs-desktop")
+
+;;
+;; saveplace mode
+;;
+;; store file positions
+(require 'saveplace)
+(setq save-place-file (concat user-emacs-directory "save-place"))
+(setq-default save-place t)
+
+;;
+;; ido mode
+;;
+
+;; replacement for find-file
+(require 'ido)
+(ido-mode t)
+
+;; replacement for switch-buffer C-x b
+;(iswitchb-mode t)
+
+(setq
+ ido-ignore-buffers               ; ignore these guys
+ '("\\` " "^\*Mess" "^\*Back" ".*Completion" "^\*Ido")
+ ido-work-directory-list '("~/" "~/Documents/")
+ ido-case-fold t                  ; be case-insensitive
+ ido-use-filename-at-point nil    ; don't use filename at point (annoying)
+ ido-use-url-at-point nil         ; don't use url at point (annoying)
+ ido-enable-flex-matching t       ; be flexible
+ ido-max-prospects 6              ; don't spam my minibuffer
+ ido-confirm-unique-completion t) ; wait for RET, even with unique completion
+
+
+;;
+;; ibuffer
+;;
+(require 'ibuffer)
+(setq ibuffer-default-sorting-mode 'major-mode
+	  ibuffer-always-show-last-buffer t
+	  ibuffer-view-ibuffer t
+)
+(global-set-key (kbd "C-x C-b") 'ibuffer-other-window)
+
+
+;;
+;; Secret Service API
+;; http://www.freedesktop.org/wiki/Specifications/secret-storage-spec
+;;
+(when (not (eq system-type 'darwin))
+  (require 'secrets)
+  )
+
+;;
+;; setup display time
+;;
+;; must come before appt-display-mode-line
+;;
+(require 'time)
+(display-time)
+(setq display-time-24hr-format t
+	  display-time-day-and-date t
+	  display-time-mail-file "/var/mail/{{ .chezmoi.username }}" ;(quote none)
+	  display-time-mail-directory nil
+	  display-time-mode t
+	  display-time-use-mail-icon t
+	  )
+
+;; for display-time-world and helm-world-time
+(setq display-time-world-list
+	  '(
+		("Pacific/Kiritimati" "Kiribati/Kritimati")
+		("Pacific/Apia" "Apia, Samoa")
+		("Pacific/Auckland" "Auckland, NZ")
+		("Australia/Sydney" "Sydney, AU")
+		("Australia/Adelaide" "Adelaide, AU")
+		("Asia/Tokyo" "Tokyo, JP")
+		("Australia/Perth" "Perth, AU")
+		("Asia/Shanghai" "Shanghai, CN")
+		("Asia/Hong_Kong" "Hong Kong, HK")
+		("Asia/Calcutta" "Bangalore, IN")
+		("Asia/Dubai" "Dubai, DU")
+		("Europe/Moscow" "Moscow, RU")
+		("Europe/Athens" "Athens, GR")
+		("Europe/Vienna" "Vienna, AT")
+		("Europe/London" "London, UK")
+		("Europe/Lisbon" "Lisbon, PT")
+		("UTC" "UTC")
+		("America/Sao_Paulo" "Sao Paulo, BR")
+		("America/Santiago" "Santiago, CL")
+		("America/New_York" "Washington DC")
+		("America/New_York" "New York, NY")
+		("America/Montreal" "Montreal, QC")
+		("America/Toronto" "Toronto, ON")
+		("America/Chicago" "Chicago, IL")
+		("America/Chicago" "Wichita, KS")
+		("America/Denver" "Denver, CO")
+		("America/Edmonton" "Edmonton, AB")
+		("America/Vancouver" "Vancouver, BC")
+		("America/Los_Angeles" "Seattle, WA")
+		("America/Anchorage" "Anchorage, AK")
+		("Pacific/Honolulu" "Honolulu, HI")
+		("Pacific/Samoa" "American Samoa, US")
+		("Etc/GMT+12" "Anywhere on Earth, Intl. Date Line")
+		)
+	  zoneinfo-style-world-list 'display-time-world-list
+	  display-time-world-time-format "%R UTC%z %4Z - %a %b %e %Y" ;; setup fixed length string for display-world-time (14:51 UTC+0200 CEST - Mon Aug  6 2018)
+	  )
+
+;;
+;; setup calendar and timezone
+;;
+;; sunrise-sunset
+;; calendar-sunrise-sunset-month
+;; lunar-phases
+;;
+(require 'calendar)
+(require 'solar)
+
+;; specify MM/DD/YYYY sexp entries in diary etc.
+(with-eval-after-load "calendar"
+		  (lambda () (calendar-set-date-style 'america)))
+
+(setq calendar-time-display-form '(24-hours ":" minutes (if time-zone " (") time-zone (if time-zone ")"))
+	  calendar-date-display-form '(
+								   (format-time-string "%b %e, %Y"   ;; setup fixed length string for holiday-list, diary-insert-entry
+													   (encode-time 0 0 0
+																	(string-to-number day)
+																	(string-to-number month)
+																	(string-to-number year)
+																	)
+													   )
+								   )
+	  )
+
+;;
+;; calendar timezone localization
+;;
+
+(setq
+ calendar-week-start-day 1  ;; Monday
+ ;; the following is for sunrise-sunset https://www.gnu.org/software/emacs/manual/html_node/emacs/Sunrise_002fSunset.html
+ calendar-latitude {{ .emacs.latitude }}
+ calendar-longitude {{ .emacs.longitude }}
+ calendar-time-zone {{ .emacs.utc_offset }} ;; offset in minutes
+ calendar-location-name "{{ .emacs.location }}" ;; e.g. "Toronto, ON, Canada" iso6709: +4812+1622
+ calendar-standard-time-zone-name "{{ .emacs.standard_tz }}"
+ calendar-daylight-time-zone-name "{{ .emacs.daylight_tz }}")
+;; fix local timezone
+(set-time-zone-rule "{{ .timezone }}")
+
+;;
+;; setup diary and calendar view
+;;
+(setq diary-file "~/.emacs.d/diary")
+(setq calendar-setup nil ; use current frame for calendar and diary
+	  calendar-view-holidays-initially-flag nil
+	  calendar-view-diary-initially-flag t
+	  diary-show-holidays-flag t
+	  diary-list-include-blanks t
+	  calendar-mark-holidays-flag t
+	  calendar-mark-diary-entries-flag t
+	  diary-comment-start "#"
+	  diary-number-of-entries 12)
+(add-hook 'diary-display-hook 'fancy-diary-display)
+(add-hook 'diary-list-entries-hook 'diary-sort-entries t)
+(add-hook 'calendar-move-hook (lambda () (diary-view-entries 7)))
+
+;; display calendar week numbers
+;; https://www.emacswiki.org/emacs/CalendarWeekNumbers
+(copy-face font-lock-constant-face 'calendar-iso-week-face)
+(set-face-attribute 'calendar-iso-week-face nil :foreground "orange")
+(setq calendar-intermonth-text '(propertize
+		(format "%2d" (car (calendar-iso-from-absolute (calendar-absolute-from-gregorian (list month day year)))))
+		'font-lock-face 'calendar-iso-week-face))
+(setq calendar-intermonth-header (propertize "Wk"
+		'font-lock-face 'calendar-iso-week-face))
+
+;; setup calendar colors
+(add-hook 'calendar-today-visible-hook 'calendar-mark-today)
+(custom-theme-set-faces 'user '(calendar-today ((t :background "cyan"))))
+(custom-theme-set-faces 'user '(holiday-face ((t :background "magenta"))))
+(custom-theme-set-faces 'user '(diary-face ((t :background "green"))))
+(custom-theme-set-faces 'user '(calendar-month-header   ((t :foreground "red"))))
+(custom-theme-set-faces 'user '(calendar-weekday-header ((t :foreground "green"))))
+(custom-theme-set-faces 'user '(calendar-weekend-header ((t :foreground "magenta"))))
+
+; add support for #include in diary-file
+(add-hook 'diary-list-entries-hook 'diary-include-other-diary-files)
+(add-hook 'diary-mark-entries-hook 'diary-mark-included-diary-files)
+
+
+;;
+;; setup holidays
+;;
+(require 'holidays)
+
+;; setup catland holidays
+(setq holiday-catland-holidays
+	  '(
+		(holiday-fixed 02 12 "Darwin Day")
+		(holiday-fixed 03 14 "Pi Day")
+		(holiday-fixed 05 04 "Star Wars Day")
+		(holiday-fixed 05 20 "520 我爱你 ILY Day")
+		(holiday-fixed 05 25 "Towel Day")
+		(holiday-fixed 09 19 "International Talk Like A Pirate Day")
+		(holiday-fixed 10 12 "Freethought Day")
+		(holiday-fixed 10 13 "International Suit Up Day ")
+		))
+
+;; setup austrian holidays
+(setq holiday-austria-holidays
+	  '(
+		(holiday-fixed  1  1 "Neujahr")
+		(holiday-fixed  1  6 "Heilige Drei Könige")
+		(holiday-easter-etc 1 "Ostermontag")
+		(holiday-fixed  5  1 "1. Mai")
+		(holiday-easter-etc 39 "Christi Himmelfahrt")
+		(holiday-easter-etc 50 "Pfingstmontag")
+		(holiday-easter-etc 60 "Fronleichnam")
+		(holiday-fixed  8 15 "Mariä Himmelfahrt")
+		(holiday-fixed 10 26 "Nationalfeiertag")
+		(holiday-fixed 11  1 "Allerheiligen")
+		(holiday-fixed 12  8 "Mariä Empfängnis")
+		(holiday-fixed 12 25 "Christtag")
+		(holiday-fixed 12 26 "Stefanitag")
+		))
+(setq holiday-austria-other-holidays
+	  '(
+		(holiday-float 2 1 1 "Semester leave: VIE, NÖ")
+		(holiday-float 2 2 1 "Semester leave: VIE, NÖ")
+		(holiday-float 2 3 1 "Semester leave: VIE, NÖ")
+		(holiday-float 2 4 1 "Semester leave: VIE, NÖ")
+		(holiday-float 2 5 1 "Semester leave: VIE, NÖ")
+		(holiday-float 2 1 2 "Semester leave: Bgld, Kärnten, Tirol, Vbg")
+		(holiday-float 2 2 2 "Semester leave: Bgld, Kärnten, Tirol, Vbg")
+		(holiday-float 2 3 2 "Semester leave: Bgld, Kärnten, Tirol, Vbg")
+		(holiday-float 2 4 2 "Semester leave: Bgld, Kärnten, Tirol, Vbg")
+		(holiday-float 2 5 2 "Semester leave: Bgld, Kärnten, Tirol, Vbg")
+		(holiday-float 2 1 3 "Semester leave: OÖ, Stmk")
+		(holiday-float 2 2 3 "Semester leave: OÖ, Stmk")
+		(holiday-float 2 3 3 "Semester leave: OÖ, Stmk")
+		(holiday-float 2 4 3 "Semester leave: OÖ, Stmk")
+		(holiday-float 2 5 3 "Semester leave: OÖ, Stmk")
+		(holiday-easter-etc -2 "Karfreitag")
+		(holiday-fixed 11 01 "Allerseelen")
+		(holiday-fixed 12 24 "Heiliger Abend")
+		(holiday-fixed 12 31 "Silvester")
+		))
+
+;; setup canadian statutory holidays
+(setq holiday-canada-holidays
+	  '(
+		(holiday-fixed  1  1    "New Year's Day (CA)")
+		(holiday-easter-etc  -2 "Good Friday (CA)")
+		(holiday-sexp '(if (= 0 (calendar-day-of-week (list 7 1 year)))
+						   (list 7 2 year)
+						 (list 7 1 year)
+						) "Canada Day (CA)") ; Jul 1 unless it is a Sun
+		(holiday-float  9  1  1 "Labor Day (CA)") ; first Monday of Sep
+		(holiday-float 10  1  2 "Thanksgiving Day (CA)") ; second Monday of Oct
+		(holiday-fixed 12 25    "Christmas Day (CA)")
+		))
+
+;; setup bc holidays
+(setq holiday-bc-other-holidays
+	  '(
+		(holiday-float  2  1  3 "Family Day (BC)") ; third Monday of Feb
+		(holiday-float  5  1  3 "Victoria Day (BC)") ; third Monday of May
+		(holiday-float  8  1  1 "Civic Holiday (BC)") ; first Monday of Aug
+		(holiday-fixed 11 11    "Remembrance Day (BC)") ;
+		))
+
+;; setup ontario statutory holidays
+(setq holiday-on-other-holidays
+	  '(
+		(holiday-float  2  1  3 "Family Day (ON)") ; third Monday of Feb
+		(holiday-float  5  1  3 "Victoria Day (ON)") ; third Monday of May
+		(holiday-float  8  1  1 "Civic Holiday (ON)") ; first Monday of Aug
+		(holiday-fixed 12 26    "Boxing Day (ON)")
+		))
+
+
+;(setq holiday-other-holidays holiday-austria-other-holidays)
+;(setq holiday-local-holidays holiday-austria-holidays)
+;(setq holiday-other-holidays holiday-bc-other-holidays)
+(setq holiday-other-holidays holiday-on-other-holidays)
+(setq holiday-local-holidays holiday-canada-holidays)
+
+;; (setq calendar-christian-all-holidays-flag t)
+;; (setq calendar-bahai-all-holidays-flag t)
+;; (setq calendar-hebrew-all-holidays-flag t)
+;; (setq calendar-islamic-all-holidays-flag t)
+;; (setq calendar-chinese-all-holidays-flag nil)
+
+;; show these holidays
+(setq calendar-holidays
+	  (append
+	   ; holiday-general-holidays  ; U.S. holidays
+	   ; holiday-christian-holidays
+	   holiday-local-holidays
+	   holiday-other-holidays
+	   holiday-solar-holidays
+	   holiday-oriental-holidays
+	   )
+	  )
+
+
+
+;;
+;; setup appt
+;;
+(require 'appt)
+(setq appt-display-diary t ; display diary on first init and at midnight
+	  appt-display-mode-line t
+	  appt-msg-countdown-list '(10 5 1)
+	  appt-audible (cons 3 .5)
+	  appt-check-time-syntax nil
+	  appt-announce-method 'appt-persistent-message-announce
+	  appt-display-duration (* 5 60)
+	  appt-display-interval 2
+	  )
+(appt-activate 1)
+
+;;
+;; setup timeclock
+;;
+(require 'timeclock)
+(setq timeclock-file "~/.emacs.d/timelog"
+	  timeclock-ask-before-exiting t
+	  timeclock-workday (* 8 60 60)
+	  )
+(timeclock-mode-line-display)
+(define-key ctl-x-map "ti" 'timeclock-in)
+(define-key ctl-x-map "to" 'timeclock-out)
+(define-key ctl-x-map "tc" 'timeclock-change)
+(define-key ctl-x-map "tr" 'timeclock-reread-log)
+(define-key ctl-x-map "tu" 'timeclock-update-mode-line)
+(define-key ctl-x-map "tw" 'timeclock-when-to-leave-string)
+
+;;
+;; password store
+;;
+(require 'helm-pass)
+
+;;
+;; setup org mode
+;;
+(require 'org)
+(require 'org-habit)
+
+(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+
+(setq org-log-done 'time)
+
+(setq org-todo-keywords '((sequence
+			   "TODO(t)" "STARTED(s)"
+			   "DELEGATED(D)" "MAYBE(M)"
+			   "TRAVEL(T)" "MILESTONE(S)" "PROJECT(P)" "|"
+			   "WAITING(w@/!)" "DONE(d!)"
+			   )
+			  )
+	  )
+
+(setq org-tag-alist
+	  '(
+		("MEETING" . ?m)
+		("MILESTONE" . ?M)
+		("TASKS" . ?t)
+		("TRAVEL" . ?T)
+		("PRIVATE" . ?p)
+		("PROJECT" . ?P)
+		)
+	  )
+
+(setq org-stuck-projects
+	  (quote ( "+LEVEL=2/-DONE-TRAVEL" ; search everything on level 2, but ignore DONE and TRAVEL
+			   ("TODO" "NEXT" "NEXTACTION")
+			   ()
+			   ""  ; ignore nothing
+			   )
+			 )
+	  )
+(add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)))
+
+(setq org-agenda-prefix-format
+	  '((agenda  . " %i %-11:c%?-12t% s")
+		(timeline  . "  % s")
+		(todo  . " %i %-11:c")
+		(tags  . " %i %-11:c")
+		(search . " %i %-11:c")
+		)
+	  )
+(setq org-agenda-scheduled-leaders '("Sched.: " "Sched.%2dx: "))
+(setq org-agenda-remove-timeranges-from-blocks t)
+(setq org-agenda-time-grid
+	  '((weekly today require-timed remove-match)
+		(0500 0700 0900 1100 1200 1300 1400 1500 1600 1700 1800 1900 2100 2300)
+		"_______" "________________"
+		;;	"----------------"
+		;;	""
+		)
+	  )
+(setq org-agenda-current-time-string
+	  "now____________________________________________")
+(setq org-agenda-sorting-strategy
+	  '((agenda time-up priority-down) ;; agenda should ignore category
+		(todo category-keep priority-down)
+		(tags category-keep priority-down)
+		(search category-keep))
+	  )
+(setq org-agenda-to-appt t) ;; add appointments to the agenda view
+(setq org-agenda-window-setup 'current-window) ;; don't kill my window setup
+(setq org-agenda-skip-scheduled-if-deadline-is-shown t)
+(setq org-agenda-span 'day) ;; day mode
+(setq org-agenda-skip-deadline-prewarning-if-scheduled t)
+;;(setq org-agenda-include-all-todo t) ;; also include global TODO list
+;;(setq org-agenda-todo-ignore-scheduled t)
+;;(setq org-agenda-start-with-follow-mode t) ;; follow entry
+
+;; files that show up in the agenda view (order matters)
+(setq org-agenda-include-diary t) ; also include diary-file
+(setq org-agenda-files
+	  (quote (
+			  "~/Documents/Log/Events.org"
+			  "~/Documents/Log/Travelling.org"
+			  "~/Documents/Log/Projects.org"
+			  "~/Documents/Log/Meetings.org"
+			  "~/Documents/Log/ResearchLog.org"
+			  "~/Documents/Log/notes.org"
+			  "~/Documents/Log/todo.org"
+			  )
+			 )
+	  )
+
+;; my custom agenda commands
+(setq org-agenda-custom-commands
+	  '(
+		("I" "Itinerary (C-u <NDAYS> C-a I)" agenda "+TRAVEL"
+		 ((org-agenda-span 'month) (org-agenda-files '("~/Documents/Log/Travelling.org")))
+		 )
+		("W" "Weekly Review" ;; review waiting items
+		 ((agenda "" ((org-agenda-span 'week))) ;; review upcoming deadlines and appointments
+		  ;; type "l" in the agenda to review logged items
+		  (stuck "") ;; review stuck projects as designated by org-stuck-projects
+		  (todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
+		  (todo "MILESTONE") ;; review all projects (assuming you use todo keywords to designate projects)
+		  (todo "TRAVEL") ;; review all travelling
+		  (todo "MAYBE") ;; review someday/maybe items
+		  (todo "DELEGATED|WAITING")
+		  )
+		 )
+		)
+	  )
+
+(setq org-directory "~/Documents/Log/")
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+(setq org-reverse-note-order t)
+
+;; setting up org-capture
+(setq org-capture-bookmark nil) ; don't add a bookmark to the last captured note
+(setq org-capture-templates
+	  '(
+		("n" "new todo note" entry (file+headline "~/Documents/Log/notes.org" "Notes")
+		 "* %^{Note} %^T\n" :prepend t :immediate-finish t
+		 )
+		("s" "schedule todo item" entry (file+headline "~/Documents/Log/notes.org" "Scheduled")
+		 "* TODO %^{Schedule TODO item}\n  SCHEDULED: %^T DEADLINE: %^t\n" :prepend t :immediate-finish t
+		 )
+		("m" "add meeting" entry (file+headline "~/Documents/Log/Meetings.org" "Meetings")
+		 "* Meeting: %^{Meeting with}, %^{Location} %^T\n" :prepend t :immediate-finish t
+		 )
+		("c" "add call" entry (file+headline "~/Documents/Log/Meetings.org" "Meetings")
+		 "* Call: %^{Call with} %^T\n" :prepend t :immediate-finish t
+		 )
+		("l" "research journal" entry (file+headline "~/Documents/Log/ResearchLog.org" "Research Log")
+		 "* DONE %^{Research log title} %T\n  %? %i\n Ref: %a" :prepend t
+		 )
+		)
+	  )
+(define-key global-map "\C-cr" 'org-capture)
+
+(setq org-habit-show-habits-only-for-today nil
+	  org-habit-graph-column 70)
+
+;; format string used when creating CLOCKSUM lines and when generating a
+;; time duration (avoid showing days)
+(setq org-time-clocksum-format
+	  '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+
+
+;;
+;; gnuplot mode
+;;
+
+;; these lines enable the use of gnuplot mode
+(autoload 'gnuplot-mode "gnuplot" "gnuplot major mode" t)
+(autoload 'gnuplot-make-buffer "gnuplot" "open a buffer in gnuplot mode" t)
+
+;; this line automatically causes all files with the .gp extension to
+;; be loaded into gnuplot mode
+(setq auto-mode-alist (append '(("\\.gp$" . gnuplot-mode)) auto-mode-alist))
+
+
+;;
+;; nxml mode
+;;
+(require 'xml)
+(add-to-list 'auto-mode-alist
+		 (cons (concat "\\." (regexp-opt '("xml" "xsd" "rng" "xslt" "svg" "rss") t) "\\'")
+		   'nxml-mode))
+(fset 'xml-mode 'nxml-mode)
+(fset 'html-mode 'nxml-mode)
+
+
+;;
+;; vc setup
+;;
+
+(require 'vc)
+
+; automatically follow version-controlled file through a symbolic link
+(setq vc-follow-symlinks t)
+
+;; mark region and generate TOTP passwords
+(defun oathtool-totp-region (&optional beg end)
+  "Generate three TOTP passwords for region from &BEG to &END."
+  (interactive "r")
+  (shell-command-on-region beg end "xargs -I{} oathtool --base32 --totp -w2 '{}'")
+  )
+
+
+;; load flyspell spellchecker
+
+(setenv "DICTIONARY" "en_US,de_AT")
+(require 'ispell)
+;; https://emacs.stackexchange.com/questions/21378/spell-check-with-multiple-dictionaries
+(setq ispell-program-name "hunspell")
+(setq ispell-local-dictionary "en_US,de_AT")
+
+;;
+;; python related stuff
+;;
+;; pip install pytest                      # unit testing
+;; pip install rope jedi                   # refactoring
+;; pip install flake8 pydocstyle pylint    # code checks
+;; pip install autopep8                    # PEP8 formatting
+;; pip install yapf                        # code formatting
+;;
+(require 'elpy)
+(elpy-enable)
+
+(setq python-shell-interpreter "python3"
+	  python-shell-interpreter-args "-i")
+
+
+;;
+;; C++-related stuff
+;;
+
+;; C(++) mode
+(require 'cc-mode)
+(setq c-offsets-alist '((topmost-intro-cont . 0) (topmost-intro . 0)))
+;; switch between header and implementation
+(setq ff-search-directories
+	  '("."
+		"../src/*"
+		"../include/*"
+		"../../src/*"
+		"../../include/*"
+		"/usr/include/*"
+		"/usr/local/*/src/*")
+	  )
+(add-hook 'c-mode-common-hook
+		  (lambda()
+			(local-set-key  (kbd "C-c o") 'ff-find-other-file)
+			)
+		  )
+(add-hook 'c-mode-common-hook
+		  (lambda () (c-subword-mode 1))
+		  )
+(setq c-mode-hook
+	  '(lambda ()
+		 (gtags-mode 1)
+		 ))
+(setq-default c-default-style "linux"
+			  c-basic-offset 4
+			  tab-width 4
+			  indent-tabs-mode t)
+
+
+;; compile mode
+(require 'compile)
+(setq compilation-disable-input nil)
+(setq compilation-scroll-output t)
+(setq mode-compile-always-save-buffer-p t)
+;; bind M-x compile to C-c c
+(global-set-key "\C-cc" 'compile)
+
+
+
+;; setup fill-column-indicator
+(require 'fill-column-indicator)
+(define-globalized-minor-mode global-fci-mode fci-mode (lambda () (fci-mode 1)))
+(global-fci-mode 1)
+
+
+;;
+;; start emacsserver for emacsclient
+;;
+(require 'server)
+(server-start)
+
+
+;;
+;; GUI elements
+;;
+(tool-bar-mode 0)
+(scroll-bar-mode 0)
+
+
+;;
+;; set some convinient keybindings
+;;
+
+;; control-f11 toggles fullscreen
+(global-set-key [(control f11)]
+		'(lambda ()
+		   (interactive)
+		   (set-frame-parameter nil 'fullscreen
+					(if (frame-parameter nil 'fullscreen) nil 'fullboth)
+					)
+		   )
+		)
+
+;; control-tab cycles buffers
+(define-key org-mode-map [(control tab)] nil)
+(org-defkey org-mode-map [(control shift tab)] 'org-force-cycle-archived)
+(global-set-key [(control tab)] 'bury-buffer)
+
+
+;;
+;; ESHELL
+;;
+(require 'eshell)
+(require 'em-smart)
+
+;; plan 9 smart shell
+(add-to-list 'eshell-modules-list 'eshell-smart)
+(setq eshell-where-to-jump 'begin)
+(setq eshell-review-quick-commands nil)
+(setq eshell-smart-space-goes-to-end t)
+
+;; Start eshell or switch to it if it's active.
+(global-set-key (kbd "C-x m") 'eshell)
+;; Start a new eshell even if one is active.
+(global-set-key (kbd "C-x M") (lambda () (interactive) (eshell t)))
+
+
+;;
+;; HELM
+;;
+
+(require 'helm)
+
+;; must set before helm-config,  otherwise helm use default
+;; prefix "C-x c", which is inconvenient because you can
+;; accidentially pressed "C-x C-c"
+(setq helm-command-prefix-key "C-c h")
+
+;; allow fuzzy matches
+(setq helm-mode-fuzzy-match t)
+
+(require 'helm-config)
+(require 'helm-eshell)
+(require 'helm-files)
+(require 'helm-grep)
+(require 'helm-ls-git)
+
+; set this to highlight home location in helm-world-time
+(setq helm-time-zone-home-location calendar-location-name)
+
+;; meta-x
+(global-set-key (kbd "M-x") 'helm-M-x)
+;; show kill ring after advancing
+(global-set-key (kbd "M-y") 'helm-show-kill-ring)
+;; buffer mgmt
+(global-set-key (kbd "C-x b") 'helm-mini)
+;; find files or urls/
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+;; occur
+(global-set-key (kbd "M-s o") 'helm-occur)
+;; bookmark list
+(global-set-key (kbd "C-x r b") 'helm-bookmarks)
+;; turn on helm mode
+(helm-mode 1)
+
+;;
+;; company mode
+;;
+(require 'company)
+
+
+;;
+;; flymake
+;;
+(require 'flymake)
+
+(add-hook 'find-file-hook 'flymake-find-file-hook)
+
+(defun flymake-get-tex-args (file-name)
+  "Use chktex for TeX file FILE-NAME."
+  (list "chktex" (list "-q" "-v0" file-name)))
+
+
+;;
+;; My registers C-x r j X, where X is one of the following
+;;
+
+(set-register ?d '(file . "~/Documents/"))
+
+
+;;
+;; Finetuning
+;;
+
+;; name and email address used when editing ChangeLogs
+(setq add-log-full-name "{{ .name }}"
+	  add-log-mailing-address "{{ .email }}"
+	  add-log-keep-changes-together t ; keep new entries for the same file together
+	  )
+
+;; generate all those *~ and #* files
+;; https://www.emacswiki.org/emacs/AutoSave
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Auto-Save.html
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+(setq make-backup-files t)
+(setq auto-save-default t)
+(setq auto-save-internal 100)
+(setq auto-save-timeout 20)
+
+; https://www.gnu.org/software/emacs/manual/html_node/emacs/Backup-Names.html#Backup-Names
+(setq version-control t       ;; Use version numbers for backups.
+	  kept-new-versions 10    ;; Number of newest versions to keep.
+	  kept-old-versions 0     ;; Number of oldest versions to keep.
+	  delete-old-versions -1  ;; -1: Never delete old backups, t: Don't ask to delete excess backup versions.
+	  backup-by-copying t     ;; Copy all files, don't rename them.
+	  vc-make-backup-files t) ;; make backup also for vc-controlled files
+
+
+;; some nice defaults: wrap at 72 chars, tab width 4, text-mode
+(setq fill-column 72
+	  default-major-mode 'text-mode
+	  require-final-newline t ; always add final newline
+	  default-tab-width 4
+	  default-fill-column 72
+	  )
+
+;; highlight matches expressions in the grep result
+(setq grep-highlight-matches 't)
+
+;;
+(setq read-buffer-completion-ignore-case t)
+(setq read-file-name-completion-ignore-case t)
+
+;; Confirm on exit :-)
+(setq confirm-kill-emacs 'y-or-n-p)
+;; Changes all yes/no questions to y/n type
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; automatic closing bracket
+(require 'elec-pair)
+(electric-pair-mode t)
+
+;; Automatic display of matching parentheses
+(require 'paren)
+(show-paren-mode 1)
+(setq show-paren-delay 0
+	  show-paren-style 'mixed  ; highlight brackets, otw. expressions when offscreen
+	  )
+
+;; (set-face-background 'show-paren-match-face "#aaaaaa")
+;; (set-face-attribute 'show-paren-match-face nil
+;;					:weight 'bold :underline nil :overline nil :slant 'normal)
+;; (set-face-foreground 'show-paren-mismatch-face "red")
+;; (set-face-attribute 'show-paren-mismatch-face nil
+;;                     :weight 'bold :underline t :overline nil :slant 'normal)
+
+
+;; case insensitiv search
+(setq case-fold-search t)
+
+;; utf-8 settings
+(setq current-language-environment "UTF-8")
+(prefer-coding-system 'utf-8)
+
+;; Remove splash screen
+(setq inhibit-splash-screen t)
+
+(set-face-attribute 'mode-line nil :box nil)
+
+;; display battery status
+(setq display-battery-mode t)
+;; display column numbers
+(column-number-mode t)
+;; display line number
+(line-number-mode t)
+;; display size indication
+(size-indication-mode t)
+
+;; syntax highlightning on
+(global-font-lock-mode t)
+(setq font-lock-maximum-decoration 3)
+
+;; scroll with wheel-mice
+(mouse-wheel-mode t)
+
+;; mouse focus
+(setq focus-follows-mouse t)
+(setq mouse-autoselect-window nil)
+
+;; don't save emacs session
+(setq save-place nil)
+
+;; region highlightning for marks
+; make the current 'selection' visible
+(transient-mark-mode t)
+(setq mark-even-if-inactive t)
+
+; delete the selection area with a keypress
+(delete-selection-mode 1)
+
+; mark text with shift+arrows
+(setq shift-select-mode t)
+
+;; don't append <N> on buffer names
+;(setq uniquify-buffer-name-style t)
+(setq uniquify-buffer-name-style 'forward)
+
+;; visible bell on
+;(setq visible-bell t)
+(setq visible-bell nil) ; off for now
+(setq ring-bell-function (lambda nil (message ""))) ; turn off beeping
+
+;; automatic file de/compression
+(auto-compression-mode t)
+
+;; truncate long lines and don't wrap, even when horizontally split windows
+(set-default 'truncate-lines t)
+(setq default-truncate-lines t
+	  truncate-partial-width-windows nil
+	  overflow-newline-into-fringe t
+)
+(add-hook 'org-mode-hook (lambda () (setq truncate-lines t)))
+
+
+;
+; background color
+;
+; fix white background
+(set-background-color "white")
+; set region color
+(set-face-attribute 'region nil :background "#666" :foreground "#ffffff")
+
+; use Fira Code
+(when (window-system)
+  (add-to-list 'default-frame-alist '(font . "Fira Code-13"))
+  (set-face-attribute 'default t :font "Fira Code-13")
+)
+
+; move custom variables
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
+;; (when (>= emacs-major-version 24)
+;;   (defun startup-done ()
+;;     "split screen and do standard things"
+;;     (interactive)
+;;     (split-window-horizontally)
+;;     (org-agenda-list)
+;;     (set-frame-parameter nil 'fullscreen 'fullboth)
+;;     )
+;;   (add-hook 'after-init-hook 'startup-done)
+;; )
+
+;;; Local Variables:
+;;; mode: emacs-lisp
+;;; fill-column: 72
+;;; End:
