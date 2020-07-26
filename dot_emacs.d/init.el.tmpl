@@ -14,9 +14,9 @@
 	 )
 	)
 
-; fix SSH_AUTH_SOCK for gpg
+; fix SSH_AUTH_SOCK for gpg, and remove trailing newline with replace-regexp-in-string
 (setenv "SSH_AUTH_SOCK"
-		(shell-command-to-string "gpgconf --list-dirs agent-ssh-socket")
+		(replace-regexp-in-string "\n$" "" (shell-command-to-string "gpgconf --list-dirs agent-ssh-socket"))
 		)
 
 ;; my default email address (used in other packages)
