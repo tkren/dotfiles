@@ -3,12 +3,14 @@
 This is my repository of [chezmoi](https://www.chezmoi.io/) managed
 configuration files for the following tools:
 
+- [Emacs](https://www.gnu.org/software/emacs/)
 - [Git](https://git-scm.com/)
 - [GnuPG](https://gnupg.org/)
 - [psql](https://www.postgresql.org/docs/current/app-psql.html)
 - [ssh](https://openssh.com/)
 - [systemd](https://systemd.io/)
 - [tmux](https://tmux.github.io/)
+- [vim](https://www.vim.org/)
 - [zsh](https://www.zsh.org/)
 
 ## Clone configuration repository
