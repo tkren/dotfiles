@@ -897,14 +897,17 @@
 (setq ispell-program-name "hunspell")
 (setq ispell-local-dictionary "en_US,de_AT")
 
+
 ;;
-;; python related stuff
+;; Python
 ;;
 ;; pip install pytest                      # unit testing
 ;; pip install rope jedi                   # refactoring
 ;; pip install flake8 pydocstyle pylint    # code checks
+;; pip install isort black                 # formatter
 ;; pip install autopep8                    # PEP8 formatting
 ;; pip install yapf                        # code formatting
+;; pip install mypy                        # static type checker
 ;;
 (require 'elpy)
 (elpy-enable)
@@ -913,8 +916,19 @@
 	  python-shell-interpreter-args "-i")
 
 
+;; Elixir
+;; https://alchemist.readthedocs.io/
+(require 'alchemist)
+
+
+;; Rust
+;; https://github.com/rust-lang/rust-mode
+(require 'rust-mode)
+(setq rust-format-on-save t)
+
+
 ;;
-;; C++-related stuff
+;; C++
 ;;
 
 ;; C(++) mode
