@@ -7,6 +7,7 @@ configuration files for the following tools:
 - [Git](https://git-scm.com/)
 - [GnuPG](https://gnupg.org/)
 - [psql](https://www.postgresql.org/docs/current/app-psql.html)
+- [Rust](https://www.rust-lang.org/)
 - [ssh](https://openssh.com/)
 - [systemd](https://systemd.io/)
 - [tmux](https://tmux.github.io/)
