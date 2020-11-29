@@ -9,6 +9,9 @@
 [alias]
 	graphlog = log --graph --oneline
 	graphlogstat = log --graph --oneline --stat
+	parentlog = log --graph --oneline --first-parent
+	decorlog = log --graph --oneline --simplify-by-decoration
+	nomergelog = log --graph --oneline --no-merges
 	whatifpush = "!git cherry -v ; git push --all --dry-run ; git push --tags --dry-run"
 [core]
 	excludesFile = {{ .chezmoi.homedir }}/.gitignore
