@@ -18,7 +18,8 @@ select name,setting from pg_settings where name in ('cluster_name','bytea_output
 \set COMP_KEYWORD_CASE upper
 
 -- Use a separate history file per-database
-\set HISTFILE ~/.psql/history- :DBNAME
+\set HISTFILE ~/.cache/psql/history- :DBNAME
+\set HISTSIZE 10000
 
 -- If a command is run more than once in a row, only store it once in the history
 \set HISTCONTROL ignoredups
