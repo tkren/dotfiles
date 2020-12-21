@@ -1,6 +1,7 @@
 [user]
 	name = {{ .name }}
 	email = {{ .email }}
+	signingkey = {{ .git.signingkey }}
 [push]
 	default = simple
 [diff "gpg"]
@@ -15,3 +16,5 @@
 	whatifpush = "!git cherry -v ; git push --all --dry-run ; git push --tags --dry-run"
 [core]
 	excludesFile = {{ .chezmoi.homedir }}/.gitignore
+[commit]
+	gpgsign = {{ .git.signcommit }}
