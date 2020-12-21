@@ -10,7 +10,11 @@ PAGER=less
 # quit less if output fits on one screen
 LESS=-RXFSM
 # pipe argument through source-highlight filter
+{{- if (or (eq .chezmoi.osRelease.id "debian") (eq .chezmoi.osRelease.id "ubuntu")) }}
 LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
+{{- else }}
+LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
+{{- end }}
 
 # help paperconf
 PAPERSIZE={{ .papersize }}
@@ -53,12 +57,23 @@ DEBUILD_DPKG_BUILDPACKAGE_OPTS="-k0xF69AFC03593F5D866B748D908BDEAA5952784983 -sa
 DEBUILD_LINTIAN=yes
 DEBUILD_LINTIAN_OPTS="-I --pedantic --color always --no-tag-display-limit"
 
-# gnome keyring is screwed up and always overwrite SSH_AUTH_SOCK
+# disable ssh keyring component:
+#
+# cp /etc/xdg/autostart/gnome-keyring-ssh.desktop ~/.config/autostart
+# remove Exec=... with Exec=/usr/bin/gnome-keyring-daemon --start --components=secrets
+#
+# gnome keyring is screwed up and always overwrites SSH_AUTH_SOCK:
 # https://wiki.archlinux.org/index.php/GNOME/Keyring#Disable_keyring_daemon_components
 #GSM_SKIP_SSH_AGENT_WORKAROUND DEFAULT="1"
 # ssh-agent by systemd
 #SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gnupg/S.gpg-agent.ssh"
+
+{{ if (eq .chezmoi.osRelease.id "fedora") -}}
+# make keepassxc happy on Fedora Wayland
+# https://github.com/keepassxreboot/keepassxc/issues/4105
+QT_QPA_PLATFORM=xcb
+{{- end }}
 
 # askpass
 SSH_ASKPASS=/usr/bin/ssh-askpass
