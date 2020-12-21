@@ -48,10 +48,35 @@ name = "YOUR NAME"
 papersize = "LOCALIZED PAPER SIZE"
 timezone = "TIMEZONE NAME"
 
+[data.git]
+signingkey = "DEFAULT 0xKEYID"
+signcommit = true
+
 [data.gnupg]
 default_key = "DEFAULT KEYID"
 hidden_encrypt_to = ["KEYID1", "KEYID2", ...]
 pinentry_program = "/path/to/bin/pinentry"
+
+[data.mutt]
+domain = "MY.TLD"
+alternates = ["EMAIL1", "EMAIL2", ...]
+bcc = "BCC@MY.TLD"
+pgp_default_key = "DEFAULT KEYID"
+pgp_sign_as = "KEYID"
+imaps_uri = "IMAP SERVER"
+imaps_pass = "pass mail/imap.postsubmeta.net"
+mailing_lists = ["MAILING LIST1", "MAILING LIST2", ...]
+
+[data.emacs]
+epg_user_id = "DEFAULT KEYID"
+printer_name = "PRINTERNAME"
+latitude = "LOCATION LATITUDE"
+longitude = "LOCATION LONGITUDE"
+timezone = "STD TZ NAME"
+daylight_tz = "DAYLIGHT TZ NAME"
+standard_tz = "STD TZ NAME"
+utc_offset = "UTC OFFSET IN MINUTES"
+location = "LOCATION NAME"
 ```
 
 Check the settings with
