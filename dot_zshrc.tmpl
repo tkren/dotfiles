@@ -67,7 +67,7 @@ if [ -x /usr/bin/cowsay -a -x /usr/bin/fortune ]; then
 {{ else -}}
 if [ -x /usr/games/cowsay -a -x /usr/games/fortune ]; then
     fortune -a | cowsay -n -f $(ls -1 /usr/share/cowsay/cows/ | shuf -n1)
-{{- end -}}
+{{ end -}}
 fi
 
 # enable zsh-syntax-highlighting and zsh-autosuggestions
