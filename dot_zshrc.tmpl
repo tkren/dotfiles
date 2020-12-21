@@ -43,7 +43,7 @@ fi
 ## enable zmv
 #autoload -Uz zmv
 
-# Some more alias to avoid making mistakes:
+# avoid mistakes
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
@@ -61,8 +61,13 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
+{{ if (eq .chezmoi.osRelease.id "fedora") -}}
+if [ -x /usr/bin/cowsay -a -x /usr/bin/fortune ]; then
+    fortune -a | cowsay -n -f $(find /usr/share/cowsay -name '*.cow' -printf '%f\n' | shuf -n1)
+{{ else -}}
 if [ -x /usr/games/cowsay -a -x /usr/games/fortune ]; then
     fortune -a | cowsay -n -f $(ls -1 /usr/share/cowsay/cows/ | shuf -n1)
+{{- end -}}
 fi
 
 # enable zsh-syntax-highlighting and zsh-autosuggestions
