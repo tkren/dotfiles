@@ -40,8 +40,11 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-## enable zmv
-#autoload -Uz zmv
+# enable zmv
+# e.g.: zmv -n 'abc(*)/file.txt' 'file-${1}.txt'
+autoload -Uz zmv
+alias zcp='zmv -C'
+alias zln='zmv -L'
 
 # avoid mistakes
 alias rm='rm -i'
@@ -84,6 +87,7 @@ unset extension
 
 autoload -U colors && colors
 
+# https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
 # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples
 # https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
 autoload -Uz vcs_info
