@@ -1,12 +1,32 @@
+[core]
+	excludesFile = {{ .chezmoi.homedir }}/.gitignore
+	pager = delta
 [user]
 	name = {{ .name }}
 	email = {{ .email }}
 	signingkey = {{ .git.signingkey }}
 [push]
 	default = simple
+[commit]
+	gpgsign = {{ .git.signcommit }}
+[diff]
+	colorMoved = default
 [diff "gpg"]
 	textconv = gpg --no-tty --decrypt
 	binary = true
+[interactive]
+    diffFilter = delta --color-only
+[delta]
+    features = line-numbers decorations
+    whitespace-error-style = 22 reverse
+	syntax-theme = TwoDark
+    plus-style = syntax "#003800"
+    minus-style = syntax "#3f0001"
+[delta "decorations"]
+    commit-decoration-style = bold yellow box ul
+    file-style = bold yellow ul
+    file-decoration-style = none
+	hunk-header-decoration-style = yellow box
 [alias]
 	graphlog = log --graph --oneline
 	graphlogstat = log --graph --oneline --stat
@@ -14,7 +34,3 @@
 	decorlog = log --graph --oneline --simplify-by-decoration
 	nomergelog = log --graph --oneline --no-merges
 	whatifpush = "!git cherry -v ; git push --all --dry-run ; git push --tags --dry-run"
-[core]
-	excludesFile = {{ .chezmoi.homedir }}/.gitignore
-[commit]
-	gpgsign = {{ .git.signcommit }}
