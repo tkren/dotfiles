@@ -15,17 +15,17 @@
 	textconv = gpg --no-tty --decrypt
 	binary = true
 [interactive]
-    diffFilter = delta --color-only
+	diffFilter = delta --color-only
 [delta]
-    features = line-numbers decorations
-    whitespace-error-style = 22 reverse
+	features = line-numbers decorations
+	whitespace-error-style = 22 reverse
 	syntax-theme = TwoDark
-    plus-style = syntax "#003800"
-    minus-style = syntax "#3f0001"
+	plus-style = syntax "#003800"
+	minus-style = syntax "#3f0001"
 [delta "decorations"]
-    commit-decoration-style = bold yellow box ul
-    file-style = bold yellow ul
-    file-decoration-style = none
+	commit-decoration-style = bold yellow box ul
+	file-style = bold yellow ul
+	file-decoration-style = none
 	hunk-header-decoration-style = yellow box
 [alias]
 	graphlog = log --graph --oneline
