@@ -44,9 +44,52 @@
 ;; setup additional packages
 ;;
 (require 'package)
-(package-initialize)
-(add-to-list 'package-archives '("stable-melpa" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
+
+; locked packages, see also https://stackoverflow.com/a/10093312
+(defvar package-locked-list)
+(setq package-locked-list '(
+							alchemist
+							bbdb
+							browse-kill-ring
+							company
+							elpy
+							fill-column-indicator
+							helm
+							helm-ls-git
+							helm-pass
+							json-mode
+							ledger-mode
+							magit
+							markdown-mode
+							org
+							page-break-lines
+							pinentry
+							rainbow-delimiters
+							rust-mode
+							)
+	  )
+
+; we ignore errors on startup if we can't connect to melpa and friends
+; use emacs --debug-init to catch problems
+(ignore-errors
+  (unless package-archive-contents (package-refresh-contents))
+  )
+(ignore-errors
+  (package-install-selected-packages)
+  )
+
+; install the missing packages
+(ignore-errors
+  (dolist (package package-locked-list)
+    (unless (package-installed-p package)
+      (package-install package)))
+  )
+
+; initialize after package installation
+(package-initialize)
 
 
 ;; force bookmark location
@@ -76,7 +119,6 @@
 	  magit-diff-refine-hunk 'all
 	  )
 (global-set-key (kbd "C-x g") 'magit-status)
-(setq magit-last-seen-setup-instructions "1.4.0")
 
 
 ;;
@@ -330,6 +372,12 @@
 ;; markdown mode
 ;;
 (require 'markdown-mode)
+
+
+;;
+;; json-mode
+;;
+(require 'json-mode)
 
 
 ;;
