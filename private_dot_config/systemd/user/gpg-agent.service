@@ -1,0 +1,19 @@
+# deploy with
+# - systemctl --user enable gpg-agent.service
+# - systemctl --user enable --now gpg-agent.socket
+# - systemctl --user enable --now gpg-agent-ssh.socket
+#
+# check that gpg-agent is running:
+# - systemctl --user status gpg-agent.service
+
+[Unit]
+Description=GnuPG cryptographic agent and passphrase cache
+Documentation=man:gpg-agent(1)
+Requires=gpg-agent.socket
+
+[Service]
+ExecStart=/usr/bin/gpg-agent --supervised
+ExecReload=/usr/bin/gpgconf --reload gpg-agent
+
+[Install]
+WantedBy=default.target
