@@ -1,9 +1,16 @@
 Host *
-	VisualHostKey yes
-	GSSAPIAuthentication no
-	ServerAliveInterval 15
-	ServerAliveCountMax 3
-	AddKeysToAgent ask
+    VisualHostKey yes
+    GSSAPIAuthentication no
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+    AddKeysToAgent ask
+    ControlMaster auto
+    ControlPersist 10m
+{{- if eq .chezmoi.os "linux" }}
+    ControlPath ${XDG_RUNTIME_DIR}/ssh-%r-%h-%p
+{{- else }}
+    ControlPath ~/.ssh/ctl-%r-%h-%p
+{{- end }}
 
 
 Include config-work.d/*
