@@ -130,6 +130,10 @@ keyserver-options no-honor-keyserver-url
 # the keyserver as revoked
 keyserver-options include-revoked
 
+# Re-enable fetching all key-signatures from keyservers
+# https://lists.gnupg.org/pipermail/gnupg-announce/2019q3/000439.html
+keyserver-options no-self-sigs-only
+keyserver-options no-import-clean
 
 #-----------------------------
 # algorithm and ciphers
