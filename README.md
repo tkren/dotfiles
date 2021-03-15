@@ -55,6 +55,7 @@ signcommit = true
 [data.gnupg]
 default_key = "DEFAULT KEYID"
 hidden_encrypt_to = ["KEYID1", "KEYID2", ...]
+sshcontrol = ["KEYGRIP1", "KEYGRIP2", ...]
 pinentry_program = "/path/to/bin/pinentry"
 
 [data.mutt]
