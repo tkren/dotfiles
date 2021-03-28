@@ -92,5 +92,5 @@ chezmoi data
 Deploy the configuration files to your home directory with
 
 ```
-chezmoi apply -v --follow
+chezmoi apply -v
 ```
