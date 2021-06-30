@@ -1,5 +1,11 @@
 # gpg-agent.conf
 
+# gopass bails out sometimes in case multiple concurrent calls to gpg
+# need to be made, see
+# https://github.com/gopasspw/gopass/blob/master/docs/faq.md#faq
+# https://www.gnupg.org/documentation/manuals/gnupg/Agent-Options.html
+auto-expand-secmem
+
 # export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 # for ssh support
 enable-ssh-support
