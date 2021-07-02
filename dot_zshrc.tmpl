@@ -51,6 +51,51 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
+# convert timestamps to localtime
+function tsatlocal() {
+    if [[ $# > 0 ]]; then
+        date -Iseconds -d "$1"
+    else
+        xargs -r -I{} date -Iseconds -d "{}"
+    fi
+}
+
+# convert timestamps to UTC
+function tsatutc() {
+    if [[ $# > 0 ]]; then
+        date -Iseconds -u -d "$1"
+    else
+        xargs -r -I{} date -Iseconds -u -d "{}"
+    fi
+}
+
+# convert timestamps to timezone
+function tsattz() {
+    if [[ $# > 0 ]]; then
+        env TZ=$2 date -Iseconds -d "$1"
+    else
+        awk '{system("env TZ=" $2 " date -Iseconds -d " $1)}'
+    fi
+}
+
+# convert seconds since epoch to timestamp
+function unixasts() {
+    if [[ $# > 0 ]]; then
+        date -Iseconds -d "@$1"
+    else
+        xargs -r -I{} date -d "@{}"
+    fi
+}
+
+# convert timestamp to seconds since epoch
+function tsasunix() {
+    if [[ $# > 0 ]]; then
+        date -d "$1" +"%s"
+    else
+        xargs -r -I{} date -d "{}" +"%s"
+    fi
+}
+
 
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-colors ''
