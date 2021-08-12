@@ -40,6 +40,9 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
+# enable zoxide https://github.com/ajeetdsouza/zoxide
+eval "$(zoxide init zsh)"
+
 # enable zmv
 # e.g.: zmv -n 'abc(*)/file.txt' 'file-${1}.txt'
 autoload -Uz zmv

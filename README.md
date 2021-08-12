@@ -4,6 +4,7 @@ This is my repository of [chezmoi](https://www.chezmoi.io/) managed
 configuration files for the following tools:
 
 - [Emacs](https://www.gnu.org/software/emacs/)
+- [fzf](https://github.com/junegunn/fzf)
 - [Git](https://git-scm.com/)
 - [GnuPG](https://gnupg.org/)
 - [psql](https://www.postgresql.org/docs/current/app-psql.html)
@@ -12,6 +13,7 @@ configuration files for the following tools:
 - [systemd](https://systemd.io/)
 - [tmux](https://tmux.github.io/)
 - [vim](https://www.vim.org/)
+- [zoxide](https://github.com/ajeetdsouza/zoxide)
 - [zsh](https://www.zsh.org/)
 
 ## Clone configuration repository
