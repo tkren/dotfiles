@@ -62,3 +62,7 @@ set -g status-left "#[fg=Green]#(whoami)#[fg=white]@#[fg=blue]#h #[fg=white](#[f
 {{- end }}
 set -g status-justify left
 set -g status-right '#[fg=Cyan]#S #[fg=white]%a %b %d %R'
+
+# create or attach prod and dev sessions
+new-session -A -s prod
+new-session -A -s dev
