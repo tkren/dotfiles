@@ -72,6 +72,24 @@ with-fingerprint
 list-options show-uid-validity
 verify-options show-uid-validity
 
+# Do not start the gpg-agent or the dirmngr, we use our own setup:
+#
+# systemctl --user enable --now \
+#    dirmngr.socket \
+#    gpg-agent.socket \
+#    gpg-agent-ssh.socket \
+#    gpg-agent-extra.socket
+#
+# The gpg-agent sockets will automatically start gpg-agent.service if
+# gpg needs them (remote or local).  This will forward gpg-agent over
+# ssh (gpg-agent-extra.socket) and emulate ssh-agent
+# (gpg-agent-ssh.socket).
+#
+# Use the following to check whether dirmngr/gpg-agent is running:
+# - systemctl --user status dirmngr.service
+# - systemctl --user status gpg-agent.service
+no-autostart
+
 # Try to use the GnuPG-Agent. With this option, GnuPG first tries to connect to
 # the agent before it asks for a passphrase.
 use-agent
