@@ -987,6 +987,18 @@
 (setq rust-format-on-save t)
 
 
+;; Rust Language Server
+;; https://github.com/rust-lang/rls
+;; https://emacs-lsp.github.io/lsp-mode/
+(require 'lsp-mode)
+
+
+;; rustic
+;; https://github.com/brotzeit/rustic
+(require 'rustic)
+(setq rustic-lsp-server 'rls)
+
+
 ;;
 ;; C++
 ;;
