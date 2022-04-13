@@ -1,6 +1,7 @@
 # ~/.config/environment.d/00-environment.conf -*- mode: sh -*-
 #
 # https://wiki.archlinux.org/index.php/Systemd/User#Environment_variables
+# systemctl --user show-environment
 #
 
 EMAIL={{ .email }}
@@ -65,9 +66,15 @@ DEBUILD_LINTIAN_OPTS="-I --pedantic --color always --no-tag-display-limit"
 # gnome keyring is screwed up and always overwrites SSH_AUTH_SOCK:
 # https://wiki.archlinux.org/index.php/GNOME/Keyring#Disable_keyring_daemon_components
 #GSM_SKIP_SSH_AGENT_WORKAROUND DEFAULT="1"
-# ssh-agent by systemd
+
+# ssh-agent managed by systemd
 #SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+# gpg-agent with ssh-agent support
 SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gnupg/S.gpg-agent.ssh"
+
+# ssh and ssh-add should prefer ssh-askpass
+SSH_ASKPASS=/usr/bin/ssh-askpass
+SSH_ASKPASS_REQUIRE=prefer
 
 {{ if (eq .chezmoi.osRelease.id "fedora") -}}
 # make keepassxc happy on Fedora Wayland
@@ -75,6 +82,5 @@ SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gnupg/S.gpg-agent.ssh"
 QT_QPA_PLATFORM=xcb
 {{- end }}
 
-# askpass
-SSH_ASKPASS=/usr/bin/ssh-askpass
+# sudo -A
 SUDO_ASKPASS=/usr/bin/ssh-askpass
