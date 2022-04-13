@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenSSH authentication agent
+Documentation=man:ssh-agent(1) man:ssh-add(1) man:ssh(1)
+
+[Service]
+# DISPLAY required for ssh-askpass to work
+Environment=SSH_AUTH_SOCK=%t/openssh/ssh-agent.socket DISPLAY=:0
+ExecStart=/usr/bin/ssh-agent -d -a $SSH_AUTH_SOCK
+RuntimeDirectory=openssh
+RuntimeDirectoryPreserve=yes
+RuntimeDirectoryMode=0700
+SuccessExitStatus=2
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

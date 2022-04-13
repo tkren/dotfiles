@@ -1,0 +1,11 @@
+[Unit]
+Description=systemd proxy helper socket for socket-activated ssh-agent
+Documentation=man:ssh-agent(1) man:systemd-socket-proxyd(8)
+
+[Socket]
+ListenStream=%t/ssh-agent.socket
+FileDescriptorName=std
+SocketMode=0600
+
+[Install]
+WantedBy=sockets.target
