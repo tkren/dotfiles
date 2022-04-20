@@ -1,11 +1,12 @@
 [Unit]
+After=ssh-agent.service
+BindsTo=ssh-agent.service
 Description=systemd proxy helper service for socket-activated ssh-agent
 Documentation=man:ssh-agent(1) man:systemd-socket-proxyd(8)
 Requires=ssh-agent-proxy.socket
-BindsTo=ssh-agent.service
-After=ssh-agent.service
 
 [Service]
+# connect %t/openssh/ssh-agent.socket with ssh-agent-proxy.socket
 ExecStart=/lib/systemd/systemd-socket-proxyd %t/openssh/ssh-agent.socket
 
 [Install]
