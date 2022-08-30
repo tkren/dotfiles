@@ -14,8 +14,7 @@ Host *
     ControlPath ~/.ssh/ctl-%r-%h-%p
 {{- end }}
     # for debugging auth keys, enable the next line (requires OpenSSH 8.5+)
-    # LogVerbose *:userauth_pubkey():*,*:pubkey_prepare():*,*:sign_and_send_pubkey():*,*:load_identity_file():*,*:input_userauth_pk_ok():*
-
+    # LogVerbose *:ssh_login():*,*:ssh_userauth2():*,*:send_pubkey_test():*,*:get_agent_identities():*,*:userauth_pubkey():*,*:pubkey_prepare():*,*:sign_and_send_pubkey():*,*:load_identity_file():*,*:input_userauth_pk_ok():*
 
 Include config-work.d/*
 Include config-priv.d/*
