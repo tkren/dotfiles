@@ -9,9 +9,9 @@ Host *
     ControlMaster auto
     ControlPersist 10m
 {{- if eq .chezmoi.os "linux" }}
-    ControlPath ${XDG_RUNTIME_DIR}/ssh-%r-%h-%p
+    ControlPath ${XDG_RUNTIME_DIR}/ssh-%C
 {{- else }}
-    ControlPath ~/.ssh/ctl-%r-%h-%p
+    ControlPath ~/.ssh/ctl-%C
 {{- end }}
     # for debugging auth keys, enable the next line (requires OpenSSH 8.5+)
     # LogVerbose *:ssh_login():*,*:ssh_userauth2():*,*:send_pubkey_test():*,*:get_agent_identities():*,*:userauth_pubkey():*,*:pubkey_prepare():*,*:sign_and_send_pubkey():*,*:load_identity_file():*,*:input_userauth_pk_ok():*
