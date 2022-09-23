@@ -988,15 +988,16 @@
 
 
 ;; Rust Language Server
-;; https://github.com/rust-lang/rls
+;; https://rust-analyzer.github.io/
 ;; https://emacs-lsp.github.io/lsp-mode/
+;; https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/
 (require 'lsp-mode)
 
 
 ;; rustic
 ;; https://github.com/brotzeit/rustic
 (require 'rustic)
-(setq rustic-lsp-server 'rls)
+(setq rustic-analyzer-command '("~/.cargo/bin/rust-analyzer"))
 
 
 ;;
