@@ -47,4 +47,8 @@
     decorlog = log --graph --oneline --simplify-by-decoration
     nomergelog = log --graph --oneline --no-merges
     whatifpush = "!f(){ git status -s -b --show-stash --ahead-behind ; echo '## Would apply the following commits'; git cherry -v; echo \"## Would push $@\"; git push --dry-run \"$@\"; }; f"
-    forkpoint = merge-base --fork-point origin
+    fetch-rebase-main = "!f(){ git fetch -p origin ; git rebase --fork-point --onto origin/main origin; }; f"
+    fork-point = merge-base --fork-point origin
+    branches-for-cleaning = branch --merged
+    open-branches = branch --no-merged
+    is-contained = "!f(){ git merge-base --is-ancestor \"$@\" && echo 'contained' || echo 'not contained';}; f"
