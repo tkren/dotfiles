@@ -54,6 +54,9 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
+# rsync client over ssh
+alias ssh-rsync='rsync -e ssh -Pachivz'
+
 # convert timestamps to localtime
 function tsatlocal() {
     if [[ $# > 0 ]]; then
