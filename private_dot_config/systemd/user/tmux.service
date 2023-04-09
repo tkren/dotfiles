@@ -1,0 +1,21 @@
+[Unit]
+Description=tmux in detached session (requires `loginctl enable-linger $USER`)
+Documentation=man:tmux(1) https://wiki.archlinux.org/title/Tmux#Autostart_with_systemd https://www.freedesktop.org/software/systemd/man/systemd-run.html#id-1.8.6 https://wiki.archlinux.org/title/Systemd/User#Kill_user_processes_on_logout
+
+[Service]
+Environment=DISPLAY=:0
+ExecReload=/usr/bin/tmux -S %t/tmux/default source-file %h/.config/tmux/tmux.conf
+ExecStart=/usr/bin/tmux -S %t/tmux/default new-session -n default -d -P -F "tmux #{version} #{socket_path} #{session_name} #{start_time} "
+ExecStop=/usr/bin/tmux -S %t/tmux/default kill-server
+# wait for the last process in the cgroup
+ExitType=cgroup
+RemainAfterExit=yes
+# create %t/tmux directory
+RuntimeDirectory=tmux
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+Type=forking
+WorkingDirectory=~
+
+[Install]
+WantedBy=default.target
