@@ -3,12 +3,13 @@ Description=OpenSSH authentication agent
 Documentation=man:ssh-agent(1) man:ssh-add(1) man:ssh(1) https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent-04 https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.agent
 
 [Service]
-# DISPLAY required for ssh-askpass to work
-Environment=SSH_AUTH_SOCK=%t/openssh/ssh-agent.socket DISPLAY=:0
+# 10m default identities lifetime
+Environment=IDENTITY_LIFETIME=10m
+Environment=SSH_AUTH_SOCK=%t/openssh/ssh-agent.socket
 # reload deletes all identities from the agent
 ExecReload=/usr/bin/ssh-add -vvv -D
-# start agent in debug mode listening on SSH_AUTH_SOCK, 10m default identities lifetime
-ExecStart=/usr/bin/ssh-agent -d -t 10m -a $SSH_AUTH_SOCK
+# start agent in debug mode listening on SSH_AUTH_SOCK
+ExecStart=/usr/bin/ssh-agent -d -t $IDENTITY_LIFETIME -a $SSH_AUTH_SOCK
 # wait until SSH_AUTH_SOCK got created to avoid race conditions
 ExecStartPost=/usr/bin/inotifywait --timeout 5 --event create --format '%%:e %%f' %t/openssh
 Restart=always
@@ -16,10 +17,10 @@ Restart=always
 RuntimeDirectory=openssh
 RuntimeDirectoryMode=0700
 RuntimeDirectoryPreserve=yes
-# keep ssh-agent running for at most 60m, then kill and restart
+# keep ssh-agent running for this amount of time, then kill and restart
 RuntimeMaxSec=60m
 SuccessExitStatus=2
 Type=simple
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
