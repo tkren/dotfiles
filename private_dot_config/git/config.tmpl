@@ -42,11 +42,11 @@
     file-decoration-style = none
     hunk-header-decoration-style = yellow box
 [alias]
-    graphlog = log --graph --oneline
-    graphlogstat = log --graph --oneline --stat
-    parentlog = log --graph --oneline --first-parent
-    decorlog = log --graph --oneline --simplify-by-decoration
-    nomergelog = log --graph --oneline --no-merges
+    graphlog = log --graph --oneline --decorate=short
+    graphlogstat = log --graph --oneline --stat --decorate=short
+    parentlog = log --graph --oneline --first-parent --decorate=short
+    decorlog = log --graph --oneline --simplify-by-decoration --decorate=short
+    nomergelog = log --graph --oneline --no-merges --decorate=short
     whatifpush = "!f(){ git status -s -b --show-stash --ahead-behind ; echo '## Would apply the following commits'; git cherry -v; echo \"## Would push $@\"; git push --dry-run \"$@\"; }; f"
     fetch-rebase-main = "!f(){ git fetch -p origin ; git rebase --fork-point --onto origin/main origin; }; f"
     fork-point = merge-base --fork-point origin
