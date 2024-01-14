@@ -42,6 +42,7 @@
     file-decoration-style = none
     hunk-header-decoration-style = yellow box
 [alias]
+    branchstats = "!f(){ git for-each-ref --sort=-authordate --format=$'%(if)%(HEAD)%(then)* %(color:bold yellow)%(objectname:short)%(color:default nobold)\t%(color:bold green)%(refname:short)%(color:default nobold)%(else)  %(color:yellow)%(objectname:short)%(color:default nobold)\t%(color:green)%(refname:short)%(color:default nobold)%(end)\t%(upstream:trackshort) %(color:bold red)%(upstream:short)%(color:default nobold) %(upstream:track)\t%(committerdate:relative)\t%(worktreepath)' --color=always refs/heads/ | column -s $'\t' -t; }; f"
     graphlog = log --graph --oneline --decorate=short
     graphlogstat = log --graph --oneline --stat --decorate=short
     parentlog = log --graph --oneline --first-parent --decorate=short
